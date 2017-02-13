@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TDo: Authentication</title>
+    <style>
+        * { padding: 0; margin: 0; font-family: 'Arial', 'Helvetica', 'sans-serif' }
+        html {
+            width: 100%;
+            height: 100%;
+        }
+        html, body {
+            height: 100%;
+            background: #e2e1e0;
+        }
+        .wrapper {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .token {
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 50px;
+            box-shadow: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
+        }
+        .token * {
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            text-align: center;
+        }
+    </style>
+</head>
+<body onload="showinput()">
+    <div class="wrapper">
+        <section class="token">
+            <h2>TDo</h2>
+            <h5>Your authentication succeeded, here is your token:</h5>
+            <input type="text" id="token" style="display: none" onClick="this.setSelectionRange(0, this.value.length)" value="" />
+        </section>
+    </div>
+    <script>
+        function showinput() {
+            var token = window.location.href.split('#token=')[1];
+            document.getElementById('token').value = token;
+            document.getElementById('token').style['display'] = 'block';
+        }
+    </script>
+</body>
+</html>
