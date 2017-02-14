@@ -20,6 +20,37 @@ export function promisifyModule(mod) {
     return result;
 }
 
+export function promisifyClass(cls) {
+    const result = Object.assign({}, cls);
+    getAllMethods(cls).forEach((potentialCandidate) => {
+        if(isFunction(cls[potentialCandidate]) && !potentialCandidate.endsWith('Sync')) result[potentialCandidate] = promisify(cls[potentialCandidate], cls);
+    });
+    return result;
+}
+
+// http://stackoverflow.com/a/35033472
+export const getAllMethods = (obj) => {
+    let props = [];
+    do {
+        const l = Object.getOwnPropertyNames(obj)
+            .concat(Object.getOwnPropertySymbols(obj).map(s => s.toString()))
+            .sort()
+            .filter((p, i, arr) =>
+                typeof obj[p] === 'function' &&  //only the methods
+                p !== 'constructor' &&           //not the constructor
+                (i == 0 || p !== arr[i - 1]) &&  //not overriding in this prototype
+                props.indexOf(p) === -1          //not overridden in a child
+            );
+        props = props.concat(l)
+    }
+    while (
+    (obj = Object.getPrototypeOf(obj)) &&   //walk-up the prototype chain
+    Object.getPrototypeOf(obj)              //not the the Object prototype methods (hasOwnProperty, etc...)
+        );
+
+    return props
+};
+
 function numSort(a, b) {
     return a - b;
 }
@@ -35,7 +66,7 @@ function unwrapArguments(args) {
 function alwaysResolvableCallback(resolve) {
     return function() {
         if(Object.keys(arguments).length == 1) return resolve(arguments['0']);
-        return resolve(arguments);
+        return resolve(unwrapArguments(arguments));
     }
 }
 
@@ -43,6 +74,6 @@ function __generateCallback(resolve, reject) {
     return function() {
         if(arguments[0]) return reject(arguments[0]);
         if(Object.keys(arguments).length == 2) return resolve(arguments['1']);
-        return resolve(arguments.splice(1, arguments.length));
+        return resolve(unwrapArguments(arguments).splice(1, arguments.length));
     }
 }
